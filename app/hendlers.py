@@ -2,6 +2,7 @@ from aiogram.filters import CommandStart
 from aiogram import Router, F
 from aiogram.fsm.state import State, StatesGroup
 from aiogram.fsm.context import FSMContext
+
 from aiogram.types import (
     Message,
     InlineKeyboardMarkup,
@@ -10,33 +11,18 @@ from aiogram.types import (
     FSInputFile,
 )
 
-import os
-import io
-import cv2
-import numpy as np
-from PIL import Image as PImage
-
 import app.keyboards as kb
 
-# ======================= TensorFlow =======================
-import tensorflow as tf
-from tensorflow.keras.models import load_model
-from tensorflow.keras.layers import Conv2D
+import os
+import base64
+import cv2
 
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = "2"
 
-# Завантажуємо модель без build
-models = load_model("app/media/skin_disease_fin.h5", compile=False)
-
-# Виправляємо input_shape для всіх Conv2D шарів
-for layer in models.layers:
-    if isinstance(layer, Conv2D):
-        if isinstance(layer.input_shape, tuple) and isinstance(layer.input_shape[0], tuple):
-            layer._batch_input_shape = layer.input_shape[0]
-
-# Будуємо модель вручну
-models.build(input_shape=(None, 240, 240, 3))
-# ==========================================================
+import tensorflow
+import numpy as np
+import io
+from PIL import Image as PImage
 
 router = Router()
 
@@ -76,17 +62,37 @@ Info = [
     "Українське добровільне екологічне маркування. Його отримують товари, що відповідають екологічним стандартам: безпечні у використанні, виготовлені з мінімальним впливом на природу, можуть перероблятися. Це знак довіри для споживачів, які хочуть обирати більш екологічні товари на українському ринку.",
 ]
 
+models = tensorflow.keras.models.load_model(
+    "app/media/skin_disease_fin.h5", compile=False
+)
+
+
 class Register(StatesGroup):
     photo = State()
 
-# ===================== Callbacks =======================
-@router.callback_query(F.data.in_([f"next{i}" for i in range(10)]))
+
+@router.callback_query(
+    F.data.in_(
+        [
+            "next0",
+            "next1",
+            "next2",
+            "next3",
+            "next4",
+            "next5",
+            "next6",
+            "next7",
+            "next8",
+            "next9",
+        ]
+    )
+)
 async def callback(callback: CallbackQuery):
     index = int(callback.data.replace("next", ""))
     await callback.message.answer(text=f"{ecoMarks[index]}")
     await callback.message.answer(text=f"{Info[index]}")
 
-# ===================== Start Command =======================
+
 @router.message(CommandStart())
 async def start(message: Message):
     await message.answer(
@@ -94,7 +100,7 @@ async def start(message: Message):
         reply_markup=kb.main,
     )
 
-# ===================== Information =======================
+
 @router.message(F.text == "🌿 Дізнатися більше про екомаркування")
 async def Information(message: Message):
     await message.answer(
@@ -103,56 +109,62 @@ async def Information(message: Message):
         parse_mode="html",
     )
 
-# ===================== Choose EcoMark =======================
+
 @router.message(F.text == "♻️ Обрати екомаркування")
 async def TakePhoto(message: Message):
-    for i in range(len(ecoMarksImage)):
+    for i in range(0, 9):
         image = FSInputFile(ecoMarksImage[i])
+        text = ecoMarks[i]
+        k = int(i) + 1
         keyboard = InlineKeyboardMarkup(
-            inline_keyboard=[[InlineKeyboardButton(text="Це фото", callback_data=f"next{i}")]]
+            inline_keyboard=[
+                [InlineKeyboardButton(text=f"Це фото", callback_data=f"next{i}")]
+            ]
         )
         await message.answer_photo(
             photo=image,
-            caption=ecoMarks[i],
+            caption=text,
             parse_mode="HTML",
             reply_markup=keyboard,
         )
     await message.answer("Оберіть картинку")
 
-# ===================== Register Photo =======================
+
 @router.message(F.text == "📸 Зробити фото маркування")
-async def register_photo(message: Message, state: FSMContext):
+async def register_name(message: Message, state: FSMContext):
     await state.set_state(Register.photo)
     await message.answer("Відправте фото")
 
-@router.message(Register.photo, F.photo)
-async def process_photo(message: Message, state: FSMContext):
-    await message.answer("Аналізую фото...")
 
-    # Завантажуємо файл з Telegram
+@router.message(Register.photo, F.photo)
+async def register_city(message: Message, state: FSMContext):
+    await message.answer("Аналізую фото...")
     photo = message.photo[-1]
+
+    # завантажуємо файл з Telegram
     file = await message.bot.get_file(photo.file_id)
     downloaded_file = await message.bot.download_file(file.file_path)
     image_data = downloaded_file.read()
 
-    # Відкриваємо картинку
-    img = PImage.open(io.BytesIO(image_data)).convert("RGB")
-    img_arr = np.asarray(img)
-    resized_image = cv2.resize(img_arr, (240, 240))
-    normalized_image = resized_image / 255.0
-    y = np.expand_dims(normalized_image, axis=0)
+    # відкриваємо картинку
+    imgpath = PImage.open(io.BytesIO(image_data)).convert("RGB")
+    loadedImages = np.asarray(imgpath)
+    resized_image = cv2.resize(loadedImages, (240, 240))
+    loadedImages = resized_image / 255.0
+    y = np.expand_dims(loadedImages, axis=0)
 
-    # Передбачення
+    # передбачення
     res = models.predict(y)
-    all_params = list(res[0])
+
+    all_parametrs = list(res[0])
 
     sorted_list = []
-    for _ in range(5):
-        max_val = max(all_params)
-        max_idx = all_params.index(max_val)
+    for n in range(5):
+        max_val = max(all_parametrs)
+        max_idx = all_parametrs.index(max_val)
         sorted_list.append(max_val)
         sorted_list.append(max_idx)
-        all_params[max_idx] = 0
+        all_parametrs[max_idx] = 0
 
     data = {
         "first": sorted_list[0],
@@ -171,3 +183,4 @@ async def process_photo(message: Message, state: FSMContext):
     await message.answer(f"{ecoMarks[sorted_list[1]]}")
     await message.answer(f"{Info[sorted_list[1]]}")
     await state.clear()
+
