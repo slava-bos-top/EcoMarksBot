@@ -1,6 +1,6 @@
 aiogram
 dotenv
-tensorflow==2.20.0
+tensorflow==2.13.0
 numpy
 Pillow
 opencv-python-headless
