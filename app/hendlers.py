@@ -19,7 +19,7 @@ import cv2
 
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = "2"
 
-import tensorflow
+import tensorflow as tf
 import numpy as np
 import io
 from PIL import Image as PImage
