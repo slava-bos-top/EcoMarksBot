@@ -1,4 +1,4 @@
-aiogram
+aiogram==3.22.0
 dotenv
 tensorflow==2.13.0
 numpy
