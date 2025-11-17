@@ -1,0 +1,6 @@
+aiogram
+dotenv
+tensorflow
+numpy
+Pillow
+opencv-python
