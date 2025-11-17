@@ -3,5 +3,4 @@ dotenv
 tensorflow
 numpy
 Pillow
-opencv-python
 opencv-python-headless
