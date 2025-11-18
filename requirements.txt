@@ -1,5 +1,5 @@
 aiogram==3.22.0
-tensorflow-cpu==2.12.0
+tensorflow-cpu==2.13.0
 numpy>=1.22,<1.24
 Pillow==10.1.0
 opencv-python-headless==4.8.1.78
