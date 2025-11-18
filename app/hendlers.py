@@ -62,7 +62,9 @@ Info = [
     "Українське добровільне екологічне маркування. Його отримують товари, що відповідають екологічним стандартам: безпечні у використанні, виготовлені з мінімальним впливом на природу, можуть перероблятися. Це знак довіри для споживачів, які хочуть обирати більш екологічні товари на українському ринку.",
 ]
 
-models = tf.keras.models.load_model("app/media/model.keras", compile=False)
+models = tf.keras.models.load_model(
+    "app/media/skin_disease_fin.h5", compile=False
+)
 
 
 class Register(StatesGroup):
