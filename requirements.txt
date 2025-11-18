@@ -1,6 +1,11 @@
-aiogram==3.20.0
+# Telegram bot
+aiogram==3.19.1
+
+# TensorFlow CPU версія 2.13 для сумісності з твоєю моделлю
 tensorflow-cpu==2.13.0
-numpy>=1.22,<1.24
+
+# Залежності
+numpy<1.24,>=1.22
 Pillow==10.1.0
 opencv-python-headless==4.8.1.78
 python-dotenv==1.0.0
@@ -17,4 +22,6 @@ google-pasta>=0.1.1
 termcolor>=1.1.0
 libclang>=13.0.0
 astunparse>=1.6.0
-typing-extensions>=4.5,<4.6
+
+# Сумісна версія typing-extensions
+typing-extensions<4.6,>=4.5
