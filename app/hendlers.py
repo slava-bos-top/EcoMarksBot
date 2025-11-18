@@ -1,4 +1,4 @@
-print("DEBUG: executing hendlers.py FROM THIS FILE")
+print("DEBUG: executing hendlers.py FROM THIS")
 print(__file__)
 from aiogram.filters import CommandStart
 from aiogram import Router, F
