@@ -1,3 +1,5 @@
+print("DEBUG: executing hendlers.py FROM THIS FILE")
+print(__file__)
 from aiogram.filters import CommandStart
 from aiogram import Router, F
 from aiogram.fsm.state import State, StatesGroup
